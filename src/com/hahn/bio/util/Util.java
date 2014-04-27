@@ -1,6 +1,8 @@
-package com.hahn.bio;
+package com.hahn.bio.util;
 
-import static com.hahn.bio.Config.*;
+import static com.hahn.bio.util.Config.*;
+
+import com.hahn.bio.World;
 
 public class Util {	
 	public static String[] trim(String[] arr) {

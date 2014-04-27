@@ -1,6 +1,8 @@
-package com.hahn.bio;
+package com.hahn.bio.boid;
 
 import java.util.Arrays;
+
+import com.hahn.bio.util.Util;
 
 public class Brain {
 	private final float[] mSigmoidLookup = new float[201];

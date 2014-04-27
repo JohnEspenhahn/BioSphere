@@ -1,18 +1,24 @@
-package com.hahn.bio;
+package com.hahn.bio.boid;
 
 import static com.hahn.bio.World.rand;
-import static com.hahn.bio.Config.*;
+import static com.hahn.bio.util.Config.*;
 
 import org.newdawn.slick.Color;
 import org.newdawn.slick.Graphics;
 import org.newdawn.slick.geom.Circle;
 import org.newdawn.slick.geom.Vector2f;
 
+import com.hahn.bio.World;
+import com.hahn.bio.plant.ITargetable;
+import com.hahn.bio.plant.PlantIdentifier;
+import com.hahn.bio.util.Util;
+
 public class Boid {
 	public static final int RADIUS = 5;
 	
 	private World mWorld;
 	private Brain mBrain;
+	private Genome mGenome;
 	
 	private Vector2f mLoc;
 
@@ -23,17 +29,23 @@ public class Boid {
 	private Vector2f mMoveDir;
 	private float mSpeed;
 
+	private Color mColor;
 	private float mEnergy;
+	private int mAge;
 	
 	public Boid(Boid parent, int energy) {
 		this(parent.mWorld, parent.mLoc.x + rand.nextInt(100) - 50, parent.mLoc.y + rand.nextInt(100) - 50, energy);
 		
 		mBrain = parent.mBrain.reproduce();
+		mGenome = parent.mGenome.reproduce();
+		
+		recalculate();
 	}
 	
 	public Boid(World world, float x, float y, int energy) {
 		mWorld = world;
 		mBrain = Brain.create(3, 4, 3);
+		mGenome = new Genome();
 		
 		mLoc = new Vector2f(x, y);
 		constrainLocation();
@@ -45,16 +57,27 @@ public class Boid {
 		
 		mTarget = null;
 		mEnergy = energy;
+		
+		recalculate();
+	}
+	
+	private void recalculate() {
+		mColor = new Color((int) mGenome.get(Gene.Red), (int) mGenome.get(Gene.Green), (int) mGenome.get(Gene.Blue));
 	}
 	
 	public void update() {
 		// -------------------------------
 		// Every tick update
 		// -------------------------------
+		mAge += 1;
 		mEnergy -= BOID_METABALIZE_SPEED + mSpeed * PERCENT_SPEED_TOWARD_METABOLISM;
 		
+		if (mAge > mGenome.get(Gene.MaxAge)) {
+			mEnergy -= BOID_METABALIZE_SPEED * 2;
+		}
+		
 		// If no target then find one
-		if (mTarget == null) {
+		if (mTarget == null || mTarget.isGone()) {
 			mTarget = World.plants.findNearest(mLoc);
 			return;
 			
@@ -75,11 +98,6 @@ public class Boid {
 					
 					// Add energy left
 					mEnergy += energy;
-					
-					// If plant is dead, untarget
-					if (plant.isGone()) {
-						mTarget = null;
-					}
 				}
 				
 			// Otherwise not at target and need to update direction
@@ -166,7 +184,7 @@ public class Boid {
 	}
 	
 	public void draw(Graphics g) {
-		g.setColor(Color.blue);
+		g.setColor(mColor);
 		g.fill(new Circle(mLoc.x, mLoc.y, RADIUS));
 		
 		g.setColor(Color.white);

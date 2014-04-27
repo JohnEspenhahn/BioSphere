@@ -1,6 +1,8 @@
-package com.hahn.bio;
+package com.hahn.bio.plant;
 
 import org.newdawn.slick.geom.Vector2f;
+
+import com.hahn.bio.World;
 
 public class PlantIdentifier implements ITargetable {
 	public final int id;

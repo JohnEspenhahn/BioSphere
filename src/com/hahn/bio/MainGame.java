@@ -10,7 +10,11 @@ import org.newdawn.slick.GameContainer;
 import org.newdawn.slick.Graphics;
 import org.newdawn.slick.SlickException;
 
-import static com.hahn.bio.Config.WORLD_SIZE;
+import com.hahn.bio.util.Camera;
+import com.hahn.bio.util.Config;
+import com.hahn.bio.util.ConfigReader;
+
+import static com.hahn.bio.util.Config.WORLD_SIZE;
 
 public class MainGame extends BasicGame {
 	public static final int WIDTH = 640, HEIGHT = 480;
@@ -28,6 +32,10 @@ public class MainGame extends BasicGame {
 			g.translate(-mCamera.getX(), -mCamera.getY());
 			
 			mWorld.draw(g);
+			
+			g.translate(mCamera.getX(), mCamera.getY());
+			
+			g.drawString("Boids: " + mWorld.getBoids().size(), 10, 30);
 		}
 	}
 

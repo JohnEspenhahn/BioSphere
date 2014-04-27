@@ -1,4 +1,4 @@
-package com.hahn.bio;
+package com.hahn.bio.util;
 
 import java.io.File;
 import java.io.FileOutputStream;

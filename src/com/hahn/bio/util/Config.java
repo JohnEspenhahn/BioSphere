@@ -1,4 +1,4 @@
-package com.hahn.bio;
+package com.hahn.bio.util;
 
 public final class Config {	
 	public static int WORLD_SIZE = 1028;
@@ -13,7 +13,7 @@ public final class Config {
 						BOID_METABALIZE_SPEED = 0.1f,
 						PERCENT_SPEED_TOWARD_METABOLISM = 0.5f;
 	
-	public static float DEFAULT_MUTATE_CHANCE = 0.02f;
+	public static float DEFAULT_MUTATE_CHANCE = 0.01f;
 	
 	public static boolean DEBUG = false;
 }

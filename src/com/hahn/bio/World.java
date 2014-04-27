@@ -1,15 +1,19 @@
 package com.hahn.bio;
 
-import static com.hahn.bio.Config.START_BOIDS;
-import static com.hahn.bio.Config.START_BOID_ENERGY;
-import static com.hahn.bio.Config.WORLD_SIZE;
+import static com.hahn.bio.util.Config.START_BOIDS;
+import static com.hahn.bio.util.Config.START_BOID_ENERGY;
+import static com.hahn.bio.util.Config.WORLD_SIZE;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Random;
 
+import org.newdawn.slick.Color;
 import org.newdawn.slick.Graphics;
+
+import com.hahn.bio.boid.Boid;
+import com.hahn.bio.plant.Plants;
 
 public class World {
 	public static final Random rand = new Random();
@@ -38,11 +42,11 @@ public class World {
 		for (Boid b: mBoids) {
 			b.draw(g);
 		}
+		
+		g.setColor(Color.white);
 	}
 	
-	public void update() {
-		System.out.println("Boids = " + mBoids.size());
-		
+	public void update() {		
 		mBoidsIt = mBoids.listIterator();
 		while (mBoidsIt.hasNext()) {
 			Boid b = mBoidsIt.next();

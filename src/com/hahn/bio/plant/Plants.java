@@ -1,7 +1,7 @@
-package com.hahn.bio;
+package com.hahn.bio.plant;
 
-import static com.hahn.bio.Config.*;
 import static com.hahn.bio.World.rand;
+import static com.hahn.bio.util.Config.*;
 
 import java.util.Stack;
 
@@ -12,6 +12,7 @@ import org.newdawn.slick.geom.Vector2f;
 
 import com.amd.aparapi.Kernel;
 import com.amd.aparapi.Range;
+import com.hahn.bio.MainGame;
 
 public class Plants extends Kernel {
 	public static final int FIND_NEAREST = 0;
@@ -128,12 +129,12 @@ public class Plants extends Kernel {
 		if (hasOpenSlot()) {			
 			int x;
 			do {
-				x = nearX + rand.nextInt(400) - 200;
+				x = nearX + rand.nextInt(MainGame.WIDTH) - MainGame.WIDTH / 2;
 			} while (x < 0 || x > WORLD_SIZE);
 			
 			int y;
 			do {
-				y = nearY + rand.nextInt(400) - 200; 
+				y = nearY + rand.nextInt(MainGame.WIDTH) - MainGame.WIDTH / 2; 
 			} while (y < 0 || y > WORLD_SIZE);
 			
 			add(x, y, giveEnergy);
@@ -163,7 +164,7 @@ public class Plants extends Kernel {
 				int giveEnergy = START_PLANT_ENERGY / 4;
 				if (hasOpenSlot() && mEnergy[id] > giveEnergy * 2 && rand.nextDouble() < 0.03) {
 					mEnergy[id] -= giveEnergy;
-					add(mXs[id], mYs[id], giveEnergy);
+					addNear(mXs[id], mYs[id], giveEnergy);
 				}
 				
 				mRadius[id] = (int) Math.sqrt(mEnergy[id] / 4);
