@@ -10,7 +10,6 @@ import java.util.ListIterator;
 import java.util.Random;
 
 import org.newdawn.slick.Graphics;
-import org.newdawn.slick.geom.Vector2f;
 
 public class World {
 	public static final Random rand = new Random();
@@ -67,9 +66,5 @@ public class World {
 		} else {
 			mBoids.add(b);
 		}
-	}
-	
-	public PlantIdentifier findNearestPlant(Vector2f point) {
-		return plants.findNearest(point);
 	}
 }

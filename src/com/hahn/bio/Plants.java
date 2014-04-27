@@ -124,21 +124,30 @@ public class Plants extends Kernel {
 		return !mFreeSlots.isEmpty();
 	}
 	
-	private void reproduce(int id, int giveEnergy) {
-		mEnergy[id] -= giveEnergy;
-		
-		int newId = mFreeSlots.pop();
-		
-		do {
-			mXs[newId] = mXs[id] + rand.nextInt(400) - 200;
-		} while (mXs[newId] < 0 || mXs[newId] > WORLD_SIZE);
-		
-		do {
-			mYs[newId] = mYs[id] + rand.nextInt(400) - 200; 
-		} while (mYs[newId] < 0 || mYs[newId] > WORLD_SIZE);
-		
-		mEnergy[newId] = giveEnergy;
-		
+	public void addNear(int nearX, int nearY, int giveEnergy) {
+		if (hasOpenSlot()) {			
+			int x;
+			do {
+				x = nearX + rand.nextInt(400) - 200;
+			} while (x < 0 || x > WORLD_SIZE);
+			
+			int y;
+			do {
+				y = nearY + rand.nextInt(400) - 200; 
+			} while (y < 0 || y > WORLD_SIZE);
+			
+			add(x, y, giveEnergy);
+		}
+	}
+	
+	public void add(int x, int y, int giveEnergy) {
+		if (hasOpenSlot()) {
+			int newId = mFreeSlots.pop();
+			
+			mEnergy[newId] = giveEnergy;
+			mXs[newId] = x;
+			mYs[newId] = y;
+		}
 	}
 	
 	public void updateAndDraw(Graphics g) {
@@ -153,10 +162,12 @@ public class Plants extends Kernel {
 				
 				int giveEnergy = START_PLANT_ENERGY / 4;
 				if (hasOpenSlot() && mEnergy[id] > giveEnergy * 2 && rand.nextDouble() < 0.03) {
-					reproduce(id, giveEnergy);
+					mEnergy[id] -= giveEnergy;
+					add(mXs[id], mYs[id], giveEnergy);
 				}
 				
 				mRadius[id] = (int) Math.sqrt(mEnergy[id] / 4);
+				if (mRadius[id] <= 1) mRadius[id] = 2;
 				
 				g.fill(new Circle(mXs[id], mYs[id], mRadius[id]));
 			}

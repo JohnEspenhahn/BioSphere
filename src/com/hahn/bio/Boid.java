@@ -28,7 +28,6 @@ public class Boid {
 	public Boid(Boid parent, int energy) {
 		this(parent.mWorld, parent.mLoc.x + rand.nextInt(100) - 50, parent.mLoc.y + rand.nextInt(100) - 50, energy);
 		
-		mBrain.dispose();
 		mBrain = parent.mBrain.reproduce();
 	}
 	
@@ -52,11 +51,11 @@ public class Boid {
 		// -------------------------------
 		// Every tick update
 		// -------------------------------
-		mEnergy -= BOID_METABALIZE_SPEED + mSpeed/4;
+		mEnergy -= BOID_METABALIZE_SPEED + mSpeed * PERCENT_SPEED_TOWARD_METABOLISM;
 		
 		// If no target then find one
 		if (mTarget == null) {
-			mTarget = mWorld.findNearestPlant(mLoc);
+			mTarget = World.plants.findNearest(mLoc);
 			return;
 			
 		} else {
@@ -103,7 +102,7 @@ public class Boid {
 				// Update target once a second
 				if (--mCheckDelay < 0) {
 					mCheckDelay = 20;
-					mTarget = mWorld.findNearestPlant(mLoc);
+					mTarget = World.plants.findNearest(mLoc);
 				}
 			}
 		}
@@ -163,7 +162,7 @@ public class Boid {
 	}
 	
 	public void kill() {
-		mBrain.dispose();
+		
 	}
 	
 	public void draw(Graphics g) {

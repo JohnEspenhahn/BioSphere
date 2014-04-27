@@ -2,19 +2,8 @@ package com.hahn.bio;
 
 import java.util.Arrays;
 
-import com.amd.aparapi.Kernel;
-import com.amd.aparapi.Range;
-
-public class Brain extends Kernel {
-	@Constant
+public class Brain {
 	private final float[] mSigmoidLookup = new float[201];
-	
-	/** [0] input, [1] hidden, [2] output */
-	@Constant
-	private final int[] mSizes = new int[3];
-	
-	/** 0 - Input => Hidden, 1 - Hidden => Output */
-	private final int[] mPassId = new int[1];
 	
 	// Brain properties
 	private final float[] mInput;
@@ -27,10 +16,6 @@ public class Brain extends Kernel {
 	
 	private Brain(int in, int hidden, int out) {
 		this.setupSigmoid();
-		
-		this.mSizes[0] = in;
-		this.mSizes[1] = hidden;
-		this.mSizes[2] = out;
 		
 		// Brain properties
 		this.mInput = new float[in];
@@ -47,10 +32,6 @@ public class Brain extends Kernel {
 	private Brain(Brain b) {
 		this.setupSigmoid();
 		
-		this.mSizes[0] = b.mSizes[0];
-		this.mSizes[1] = b.mSizes[1];
-		this.mSizes[2] = b.mSizes[2];
-		
 		// Brain properties
 		this.mInput = b.mInput.clone();
 		this.mInputWeights = b.mInputWeights.clone();
@@ -64,10 +45,7 @@ public class Brain extends Kernel {
 	}
 	
 	private void init() {
-		setExplicit(true);
 		
-		put(mSizes);
-		put(mSigmoidLookup);
 	}
 	
 	public static Brain create(int in, int hidden, int out) {
@@ -77,61 +55,44 @@ public class Brain extends Kernel {
 		return brain;
 	}
 	
-	public int inputSize() {
-		return mSizes[0];
-	}
-	
-	public void update() {
-		Range range;
-		
+	public void update() {		
 		Arrays.fill(mHidden, 0);
 		Arrays.fill(mOutput, 0);
 		
-		put(mInput);
-		put(mHidden);
-		put(mOutput);
-		
-		// Input => Hidden		
-		mPassId[0] = 0;
-		range = Range.create2D(mInput.length, mHidden.length);
-		put(mPassId);
-		execute(range);
+		// Input => Hidden
+		for (int i = 0; i < mInput.length; i++) {
+			for (int j = 0; j < mHidden.length; j++) {
+				run(0, i, j);
+			}
+		}
 		
 		// Hidden => Output
-		mPassId[0] = 1;
-		range = Range.create2D(mHidden.length, mOutput.length);
-		put(mPassId);
-		execute(range);
+		for (int i = 0; i < mHidden.length; i++) {
+			for (int j = 0; j < mOutput.length; j++) {
+				run(1, i, j);
+			}
+		}
+		
 	}
 	
 	public float[] getInput() {
 		return mInput;
 	}
 	
-	public float[] getHidden() {
-		get(mHidden);
-		
+	public float[] getHidden() {		
 		return mHidden;
 	}
 	
-	public float[] getOutput() {
-		get(mOutput);
-		
+	public float[] getOutput() {		
 		return mOutput;
 	}
 	
-	@Deprecated
-	@Override
-	public void run() {
-		int pass = mPassId[0];
-		int node = getGlobalId(0);
-		int connection = getGlobalId(1);
-		
+	public void run(int pass, int node, int connection) {		
 		if (pass == 0) {
-			mHidden[connection] += mInput[node] * mInputWeights[node * mSizes[1] + connection];
+			mHidden[connection] += mInput[node] * mInputWeights[node * mHidden.length + connection];
 		} else if (pass == 1) {
 			float sigmoid = lookupSigmoid(mHidden[node]);
-			mOutput[connection] += sigmoid * mHiddenWeights[node * mSizes[2] + connection];
+			mOutput[connection] += sigmoid * mHiddenWeights[node * mOutput.length + connection];
 		}
 	}
 
