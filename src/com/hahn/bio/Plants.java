@@ -3,6 +3,8 @@ package com.hahn.bio;
 import static com.hahn.bio.Constants.*;
 import static com.hahn.bio.World.rand;
 
+import java.util.Stack;
+
 import org.newdawn.slick.Color;
 import org.newdawn.slick.Graphics;
 import org.newdawn.slick.geom.Circle;
@@ -26,11 +28,14 @@ public class Plants extends Kernel {
 	private final float[] mEnergy;
 	private final int[] mRadius;
 	
+	private final Stack<Integer> mFreeSlots;
+	
 	private Plants(int max) {
 		mRequest = new int[3];
 		mResponse = new int[4];
 		
 		mSize[0] = max;
+		mFreeSlots = new Stack<Integer>();
 		
 		mXs = new int[max];
 		mYs = new int[max];
@@ -88,23 +93,50 @@ public class Plants extends Kernel {
 		}
 	}
 	
-	public int eat(PlantIdentifier plant) {
-		get(mEnergy);
-		
+	public int eat(PlantIdentifier plant) {		
 		int energy = (int) mEnergy[plant.id];
+		kill(plant);
+		
+		return energy;
+	}
+	
+	public void kill(PlantIdentifier plant) {
 		mEnergy[plant.id] = 0;
 		mRadius[plant.id] = 0;
 		
-		put(mEnergy);
-		
-		return energy;
+		mFreeSlots.push(plant.id);
 	}
 	
 	public int getRadius(PlantIdentifier plant) {
 		return mRadius[plant.id];
 	}
 	
-	public void draw(Graphics g) {
+	public float getEnergy(PlantIdentifier plant) {
+		return mEnergy[plant.id];
+	}
+	
+	private boolean hasOpenSlot() {
+		return !mFreeSlots.isEmpty();
+	}
+	
+	private void reproduce(int id, int giveEnergy) {
+		mEnergy[id] -= giveEnergy;
+		
+		int newId = mFreeSlots.pop();
+		
+		do {
+			mXs[newId] = mXs[id] + rand.nextInt(400) - 200;
+		} while (mXs[newId] < 0 || mXs[newId] > WORLD_SIZE);
+		
+		do {
+			mYs[newId] = mYs[id] + rand.nextInt(400) - 200; 
+		} while (mYs[newId] < 0 || mYs[newId] > WORLD_SIZE);
+		
+		mEnergy[newId] = giveEnergy;
+		
+	}
+	
+	public void updateAndDraw(Graphics g) {
 		get(mXs);
 		get(mYs);
 		get(mEnergy);
@@ -112,7 +144,13 @@ public class Plants extends Kernel {
 		g.setColor(Color.green);
 		for (int id = 0; id < mSize[0]; id++) {
 			if (mEnergy[id] > 0) {
-				mEnergy[id] += 0.1f;
+				mEnergy[id] += PLANT_GROW_SPEED;
+				
+				int giveEnergy = START_PLANT_ENERGY / 4;
+				if (hasOpenSlot() && mEnergy[id] > giveEnergy * 2 && rand.nextDouble() < 0.03) {
+					reproduce(id, giveEnergy);
+				}
+				
 				mRadius[id] = (int) Math.sqrt(mEnergy[id] / 4);
 				
 				g.fill(new Circle(mXs[id], mYs[id], mRadius[id]));
@@ -120,6 +158,8 @@ public class Plants extends Kernel {
 		}
 		
 		put(mEnergy);
+		put(mYs);
+		put(mXs);
 	}
 
 	@Deprecated

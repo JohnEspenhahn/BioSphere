@@ -32,7 +32,7 @@ public class World {
 	}
 	
 	public void draw(Graphics g) {
-		plants.draw(g);
+		plants.updateAndDraw(g);
 		
 		for (Boid b: mBoids) {
 			b.draw(g);

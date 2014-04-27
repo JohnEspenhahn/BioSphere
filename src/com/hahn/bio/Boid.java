@@ -14,7 +14,10 @@ public class Boid {
 	private final World mWorld;
 	private final Brain mBrain;
 	
-	private final Vector2f mLoc, mSpeed;
+	private final Vector2f mLoc;
+	
+	/** Normalized every tick at start of update */
+	private final Vector2f mSpeed;
 	
 	private ITargetable mTarget;
 	private float mEnergy;
@@ -33,38 +36,49 @@ public class Boid {
 	}
 	
 	public void update() {
-		mEnergy -= 0.1f;
+		// Every tick update
+		mEnergy -= BOID_METABALIZE_SPEED;
+		mSpeed.normalise();
 		
 		// Find target	
 		mTarget = mWorld.findNearestPlant(mLoc);
 			
-		// Check has reached target
-		if (mTarget != null && mLoc.distanceSquared(mTarget.getLoc()) < RADIUS*RADIUS + mTarget.getRadius()*mTarget.getRadius()) {
-			if (mTarget instanceof PlantIdentifier) {
-				PlantIdentifier plant = (PlantIdentifier) mTarget;
-				int energy = World.plants.eat(plant);
-				
-				mEnergy += energy;
-			}
-			
-			mTarget = null;
-			
-			return;
-			
-		// Update ANN input
-		} else {
-			Vector2f targVec = new Vector2f(mTarget.getX() - mLoc.x, mTarget.getY() - mLoc.y);
-			int dir = getDirection(mSpeed.copy().normalise(), targVec.normalise());
-			
+		// If no target
+		if (mTarget == null) {
 			float[] input = mBrain.getInput();
-			if (dir < 0) {
-				// Left
-				input[0] = 1;
-				input[1] = 0;
+			input[0] = 0;
+			input[1] = 0;
+			
+		// If has a target
+		} else {
+			// Check reached target
+			if (mLoc.distanceSquared(mTarget.getLoc()) < RADIUS*RADIUS + mTarget.getRadius()*mTarget.getRadius()) {
+				if (mTarget instanceof PlantIdentifier) {
+					PlantIdentifier plant = (PlantIdentifier) mTarget;
+					int energy = World.plants.eat(plant);
+					
+					mEnergy += energy;
+				}
+				
+				mTarget = null;
+				
+				return;
+				
+			// Update ANN input
 			} else {
-				// Right
-				input[0] = 0;
-				input[1] = 1;
+				Vector2f targVec = new Vector2f(mTarget.getX() - mLoc.x, mTarget.getY() - mLoc.y).normalise();
+				int dir = getDirection(mSpeed, targVec);
+				
+				float[] input = mBrain.getInput();
+				if (dir < 0) {
+					// Left
+					input[0] = 1;
+					input[1] = 0;
+				} else {
+					// Right
+					input[0] = 0;
+					input[1] = 1;
+				}
 			}
 		}
 		
@@ -85,6 +99,9 @@ public class Boid {
 		mLoc.add(mSpeed);
 		
 		// Constrain location
+		mLoc.x = Util.constrain(mLoc.x, 0, WORLD_SIZE);
+		mLoc.y = Util.constrain(mLoc.y, 0, WORLD_SIZE);
+		
 		if (mLoc.x < 0) mLoc.x = 0;
 		else if (mLoc.x > WORLD_SIZE) mLoc.x = WORLD_SIZE;
 		

@@ -20,7 +20,7 @@ public class PlantIdentifier implements ITargetable {
 	}
 	
 	public boolean isGone() {
-		return World.plants.getRadius(this) <= 0;
+		return World.plants.getEnergy(this) <= 0;
 	}
 	
 	public int getX() {
