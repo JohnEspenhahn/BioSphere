@@ -10,7 +10,7 @@ import org.newdawn.slick.GameContainer;
 import org.newdawn.slick.Graphics;
 import org.newdawn.slick.SlickException;
 
-import static com.hahn.bio.Constants.WORLD_SIZE;
+import static com.hahn.bio.Config.WORLD_SIZE;
 
 public class MainGame extends BasicGame {
 	public static final int WIDTH = 640, HEIGHT = 480;
@@ -20,9 +20,6 @@ public class MainGame extends BasicGame {
 
 	public MainGame() {
 		super("BioSphere");
-
-		mWorld = new World();
-		mCamera = new Camera(WIDTH, HEIGHT, WORLD_SIZE, WORLD_SIZE);
 	}
 
 	@Override
@@ -36,7 +33,10 @@ public class MainGame extends BasicGame {
 
 	@Override
 	public void init(GameContainer container) throws SlickException {
+		ConfigReader.read(new Config());
 		
+		mWorld = new World();
+		mCamera = new Camera(WIDTH, HEIGHT, WORLD_SIZE, WORLD_SIZE);
 	}
 
 	@Override

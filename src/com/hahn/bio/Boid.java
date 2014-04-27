@@ -1,7 +1,7 @@
 package com.hahn.bio;
 
 import static com.hahn.bio.World.rand;
-import static com.hahn.bio.Constants.*;
+import static com.hahn.bio.Config.*;
 
 import org.newdawn.slick.Color;
 import org.newdawn.slick.Graphics;
@@ -11,65 +11,85 @@ import org.newdawn.slick.geom.Vector2f;
 public class Boid {
 	public static final int RADIUS = 5;
 	
-	private final World mWorld;
-	private final Brain mBrain;
+	private World mWorld;
+	private Brain mBrain;
 	
-	private final Vector2f mLoc;
-	
-	/** Normalized every tick at start of update */
-	private final Vector2f mSpeed;
-	
+	private Vector2f mLoc;
+
 	private ITargetable mTarget;
+	private int mCheckDelay;
+	
+	/** Normalized direction */
+	private Vector2f mMoveDir;
+	private float mSpeed;
+
 	private float mEnergy;
 	
-	public Boid(World world, int x, int y) {
+	public Boid(Boid parent, int energy) {
+		this(parent.mWorld, parent.mLoc.x + rand.nextInt(100) - 50, parent.mLoc.y + rand.nextInt(100) - 50, energy);
+		
+		mBrain.dispose();
+		mBrain = parent.mBrain.reproduce();
+	}
+	
+	public Boid(World world, float x, float y, int energy) {
 		mWorld = world;
-		mBrain = Brain.create(2, 3, 2);
+		mBrain = Brain.create(3, 4, 3);
 		
 		mLoc = new Vector2f(x, y);
+		constrainLocation();
 		
-		Vector2f speed = new Vector2f(rand.nextFloat() - 0.5f, rand.nextFloat() - 0.5f);
-		mSpeed = speed.normalise();
+		Vector2f dir = new Vector2f(rand.nextFloat() - 0.5f, rand.nextFloat() - 0.5f);
+		mMoveDir = dir.normalise();
+		
+		mSpeed = 1;
 		
 		mTarget = null;
-		mEnergy = START_BOID_ENERGY;
+		mEnergy = energy;
 	}
 	
 	public void update() {
+		// -------------------------------
 		// Every tick update
-		mEnergy -= BOID_METABALIZE_SPEED;
-		mSpeed.normalise();
+		// -------------------------------
+		mEnergy -= BOID_METABALIZE_SPEED + mSpeed/4;
 		
-		// Find target	
-		mTarget = mWorld.findNearestPlant(mLoc);
-			
-		// If no target
+		// If no target then find one
 		if (mTarget == null) {
-			float[] input = mBrain.getInput();
-			input[0] = 0;
-			input[1] = 0;
+			mTarget = mWorld.findNearestPlant(mLoc);
+			return;
 			
-		// If has a target
 		} else {
-			// Check reached target
-			if (mLoc.distanceSquared(mTarget.getLoc()) < RADIUS*RADIUS + mTarget.getRadius()*mTarget.getRadius()) {
+			// If at target then eat
+			float distSqu = mLoc.distanceSquared(mTarget.getLoc()); 
+			if (distSqu < RADIUS*RADIUS + mTarget.getRadius()*mTarget.getRadius()) {
+				clearInputs();
+				
 				if (mTarget instanceof PlantIdentifier) {
 					PlantIdentifier plant = (PlantIdentifier) mTarget;
-					int energy = World.plants.eat(plant);
 					
+					// Get removed energy
+					float energy = World.plants.eat(plant, 5);
+					
+					// Waste
+					energy *= 0.55f;
+					
+					// Add energy left
 					mEnergy += energy;
+					
+					// If plant is dead, untarget
+					if (plant.isGone()) {
+						mTarget = null;
+					}
 				}
 				
-				mTarget = null;
-				
-				return;
-				
-			// Update ANN input
+			// Otherwise not at target and need to update direction
 			} else {
 				Vector2f targVec = new Vector2f(mTarget.getX() - mLoc.x, mTarget.getY() - mLoc.y).normalise();
-				int dir = getDirection(mSpeed, targVec);
+				int dir = getDirection(mMoveDir, targVec);
 				
 				float[] input = mBrain.getInput();
+				input[2] = 0;
 				if (dir < 0) {
 					// Left
 					input[0] = 1;
@@ -79,34 +99,71 @@ public class Boid {
 					input[0] = 0;
 					input[1] = 1;
 				}
+				
+				// Update target once a second
+				if (--mCheckDelay < 0) {
+					mCheckDelay = 20;
+					mTarget = mWorld.findNearestPlant(mLoc);
+				}
 			}
 		}
 		
-		// Run ANN
-		mBrain.update();
-		
-		// Move based on ANN output
-		float[] output = mBrain.getOutput();
-		
-		if (output[0] > output[1]) {
-			// Right
-			mSpeed.add(5);
-		} else {
-			// Left
-			mSpeed.add(-5);
+		// -------------------------------
+		// If has energy then reproduce
+		// -------------------------------
+		if (mEnergy > START_BOID_ENERGY * 2) {
+			reproduce(START_BOID_ENERGY);
 		}
 		
-		mLoc.add(mSpeed);
 		
-		// Constrain location
+		// -------------------------------
+		// Run ANN
+		// -------------------------------
+		mBrain.update();
+		
+		
+		// -------------------------------
+		// Move based on ANN output
+		// -------------------------------
+		float[] output = mBrain.getOutput();		
+		if (output[0] > output[1]) {
+			// Right
+			mMoveDir.add(5);
+		} else {
+			// Left
+			mMoveDir.add(-5);
+		}
+		
+		mSpeed = output[2] + 0.5f;
+		if (mSpeed < 0) mSpeed = 0;
+		
+		mLoc.x += mMoveDir.x * mSpeed;
+		mLoc.y += mMoveDir.y * mSpeed;
+		
+		constrainLocation();
+	}
+	
+	private void clearInputs() {
+		float[] input = mBrain.getInput();
+		input[0] = 0;
+		input[1] = 0;
+		input[2] = 1;
+	}
+	
+	public void constrainLocation() {
 		mLoc.x = Util.constrain(mLoc.x, 0, WORLD_SIZE);
 		mLoc.y = Util.constrain(mLoc.y, 0, WORLD_SIZE);
+	}
+	
+	public void reproduce(int energy) {
+		mEnergy -= energy;
 		
-		if (mLoc.x < 0) mLoc.x = 0;
-		else if (mLoc.x > WORLD_SIZE) mLoc.x = WORLD_SIZE;
-		
-		if (mLoc.y < 0) mLoc.y = 0;
-		else if (mLoc.y > WORLD_SIZE) mLoc.y = WORLD_SIZE;
+		Boid b = new Boid(this, energy);
+		mWorld.addBoid(b);
+	}
+	
+	public void kill() {
+		mBrain.dispose();
 	}
 	
 	public void draw(Graphics g) {
@@ -114,7 +171,7 @@ public class Boid {
 		g.fill(new Circle(mLoc.x, mLoc.y, RADIUS));
 		
 		g.setColor(Color.white);
-		g.drawLine(mLoc.x, mLoc.y, mLoc.x + mSpeed.x * 8, mLoc.y + mSpeed.y * 8);
+		g.drawLine(mLoc.x, mLoc.y, mLoc.x + mMoveDir.x * 8, mLoc.y + mMoveDir.y * 8);
 	}
 	
 	public int getDirection(Vector2f p1, Vector2f p2) {

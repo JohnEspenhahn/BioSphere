@@ -1,7 +1,5 @@
 package com.hahn.bio;
 
-import static com.hahn.bio.World.rand;
-
 import java.util.Arrays;
 
 import com.amd.aparapi.Kernel;
@@ -37,19 +35,32 @@ public class Brain extends Kernel {
 		// Brain properties
 		this.mInput = new float[in];
 		this.mInputWeights = new float[in * hidden];
-		setupWeights(mInputWeights);
+		Util.fillRandom(mInputWeights, 1);
 		
 		this.mHidden = new float[hidden];
 		this.mHiddenWeights = new float[hidden * out];
-		setupWeights(mHiddenWeights);
+		Util.fillRandom(mHiddenWeights, 1);
 		
 		this.mOutput = new float[out];
 	}
 	
-	private void setupWeights(float[] weights) {
-		for (int i = 0; i < weights.length; i++) {
-			weights[i] = rand.nextFloat() * 2 - 0.5f;
-		}
+	private Brain(Brain b) {
+		this.setupSigmoid();
+		
+		this.mSizes[0] = b.mSizes[0];
+		this.mSizes[1] = b.mSizes[1];
+		this.mSizes[2] = b.mSizes[2];
+		
+		// Brain properties
+		this.mInput = b.mInput.clone();
+		this.mInputWeights = b.mInputWeights.clone();
+		Util.mutate(mInputWeights, 0.1f);
+		
+		this.mHidden = b.mHidden.clone();
+		this.mHiddenWeights = b.mHiddenWeights.clone();
+		Util.mutate(mHiddenWeights, 0.1f);
+		
+		this.mOutput = b.mOutput.clone();
 	}
 	
 	private void init() {
@@ -136,5 +147,12 @@ public class Brain extends Kernel {
 			float x = (i / 100.0f) - 1;
 			mSigmoidLookup[i] = (float) Math.tanh(x); // 2.0 / (1.0 + exp(-2.0 * x))
 		}
+	}
+	
+	public Brain reproduce() {
+		Brain b = new Brain(this);
+		b.init();
+		
+		return b;
 	}
 }

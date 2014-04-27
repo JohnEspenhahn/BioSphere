@@ -1,11 +1,12 @@
 package com.hahn.bio;
 
-import static com.hahn.bio.Constants.START_BOIDS;
-import static com.hahn.bio.Constants.WORLD_SIZE;
+import static com.hahn.bio.Config.START_BOIDS;
+import static com.hahn.bio.Config.START_BOID_ENERGY;
+import static com.hahn.bio.Config.WORLD_SIZE;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Random;
 
 import org.newdawn.slick.Graphics;
@@ -17,6 +18,7 @@ public class World {
 	public static Plants plants;
 	
 	private final List<Boid> mBoids;
+	private ListIterator<Boid> mBoidsIt;
 	
 	public World() {
 		plants = Plants.create();
@@ -27,7 +29,7 @@ public class World {
 			int x = rand.nextInt(WORLD_SIZE);
 			int y = rand.nextInt(WORLD_SIZE);
 			
-			mBoids.add(new Boid(this, x, y));
+			mBoids.add(new Boid(this, x, y, START_BOID_ENERGY));
 		}
 	}
 	
@@ -40,20 +42,31 @@ public class World {
 	}
 	
 	public void update() {
-		Iterator<Boid> it = mBoids.iterator();
-		while (it.hasNext()) {
-			Boid b = it.next();
+		System.out.println("Boids = " + mBoids.size());
+		
+		mBoidsIt = mBoids.listIterator();
+		while (mBoidsIt.hasNext()) {
+			Boid b = mBoidsIt.next();
 			b.update();
 			
 			// Remove if dead
 			if (!b.isAlive()) {
-				it.remove();
+				b.kill();
+				mBoidsIt.remove();
 			}
 		}
 	}
 	
 	public List<Boid> getBoids() {
 		return mBoids;
+	}
+	
+	public void addBoid(Boid b) {
+		if (mBoidsIt != null) {
+			mBoidsIt.add(b);
+		} else {
+			mBoids.add(b);
+		}
 	}
 	
 	public PlantIdentifier findNearestPlant(Vector2f point) {

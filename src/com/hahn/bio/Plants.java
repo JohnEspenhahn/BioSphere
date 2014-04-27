@@ -1,6 +1,6 @@
 package com.hahn.bio;
 
-import static com.hahn.bio.Constants.*;
+import static com.hahn.bio.Config.*;
 import static com.hahn.bio.World.rand;
 
 import java.util.Stack;
@@ -65,7 +65,7 @@ public class Plants extends Kernel {
 		}
 		
 		created = true;
-		Plants plants = new Plants(MAX_PANTS / 2);
+		Plants plants = new Plants(MAX_PLANTS / 2);
 		plants.init();
 		
 		return plants;
@@ -93,11 +93,16 @@ public class Plants extends Kernel {
 		}
 	}
 	
-	public int eat(PlantIdentifier plant) {		
-		int energy = (int) mEnergy[plant.id];
-		kill(plant);
+	public float eat(PlantIdentifier plant, float amnt) {
+		float e = mEnergy[plant.id];
+		if (e > amnt) {
+			mEnergy[plant.id] -= amnt;
+		} else {
+			amnt = mEnergy[plant.id];
+			kill(plant);
+		}
 		
-		return energy;
+		return amnt;
 	}
 	
 	public void kill(PlantIdentifier plant) {
