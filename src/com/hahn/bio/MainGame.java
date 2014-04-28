@@ -12,7 +12,7 @@ import org.newdawn.slick.SlickException;
 
 import com.hahn.bio.util.Camera;
 import com.hahn.bio.util.Config;
-import com.hahn.bio.util.ConfigReader;
+import com.hahn.bio.util.ConfigIO;
 
 import static com.hahn.bio.util.Config.WORLD_SIZE;
 
@@ -41,7 +41,7 @@ public class MainGame extends BasicGame {
 
 	@Override
 	public void init(GameContainer container) throws SlickException {
-		ConfigReader.read(new Config());
+		ConfigIO.read(new Config());
 		
 		mWorld = new World();
 		mCamera = new Camera(WIDTH, HEIGHT, WORLD_SIZE, WORLD_SIZE);

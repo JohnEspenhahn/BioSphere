@@ -2,6 +2,8 @@ package com.hahn.bio.util;
 
 import static com.hahn.bio.util.Config.*;
 
+import org.newdawn.slick.geom.Vector2f;
+
 import com.hahn.bio.World;
 
 public class Util {	
@@ -43,6 +45,60 @@ public class Util {
 			if (World.rand.nextFloat() < chance) {
 				vals[i] += (World.rand.nextFloat() * 2 - 1) * maxAmnt;
 			}
+		}
+	}
+	
+	public static void main(String[] args) {
+		int[][][] points = new int[][][] {
+			new int[][] {
+					new int[] { 10, 0 },
+					new int[] { 10, 1 }
+			},
+			new int[][] {
+					new int[] { 10, 0 },
+					new int[] { 10, 2 }
+			},
+			new int[][] {
+					new int[] { 10, 0 },
+					new int[] { 10, -1 }
+			},
+			new int[][] {
+					new int[] { 10, 0 },
+					new int[] { 10, -2 }
+			},
+			new int[][] {
+					new int[] { 0, 10 },
+					new int[] { -1, 10 }
+			},
+			new int[][] {
+					new int[] { 10, 0 },
+					new int[] { -10, 0 }
+			},
+			new int[][] {
+					new int[] { 10, 0 },
+					new int[] { -10, -1 }
+			},
+			new int[][] {
+					new int[] { 10, 0 },
+					new int[] { -10, 1 }
+			},
+			new int[][] {
+					new int[] { 10, 0 },
+					new int[] { 10, 10 }
+			},
+		};
+		
+		for (int[][] ps: points) {
+			Vector2f p1 = new Vector2f(ps[0][0], ps[0][1]);
+			Vector2f p2 = new Vector2f(ps[1][0], ps[1][1]);
+			
+			p1.normalise();
+			p2.normalise();
+			
+			float delta = (p1.x * p2.y) - (p1.y * p2.x);
+			double theta = Math.acos(p1.dot(p2));
+			
+			System.out.printf("<%d, %d>\t<%d, %d> = %f theta = %f\n", ps[0][0], ps[0][1], ps[1][0], ps[1][1], delta, theta);
 		}
 	}
 }

@@ -9,10 +9,9 @@ import java.sql.Timestamp;
 import java.util.Date;
 import java.util.Scanner;
 
-public class ConfigReader {
+public class ConfigIO {
 	public static <T> void read(T config) {		
 		Scanner s = null;
-		FileOutputStream fos = null;
 		
 		try {
 			Class<?> clazz = config.getClass();
@@ -56,19 +55,6 @@ public class ConfigReader {
 						}
 					}
 				}
-			} else {
-				file.createNewFile();
-				
-				fos = new FileOutputStream(file);
-				fos.write(String.format("# Created %s\r\n", new Timestamp(new Date().getTime()).toString()).getBytes());
-				
-				for (Field f: clazz.getFields()) {
-					if (Modifier.isStatic(f.getModifiers())) {
-						fos.write(String.format("%s=%s\r\n", f.getName(), f.get(null).toString()).getBytes());
-					}
-				}
-				
-				fos.close();
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -76,7 +62,34 @@ public class ConfigReader {
 			if (s != null) {
 				s.close();
 			}
+		}
+		
+		write(config);
+	}
+	
+	public static <T> void write(T config) {
+		FileOutputStream fos = null;
+		
+		try {
+			Class<?> clazz = config.getClass();
+			File file = new File(config.getClass().getSimpleName().toLowerCase() + ".properties");
+			if (!file.exists()) {
+				file.createNewFile();
+			}
 			
+			fos = new FileOutputStream(file);
+			fos.write(String.format("# Created %s\r\n", new Timestamp(new Date().getTime()).toString()).getBytes());
+			
+			for (Field f: clazz.getFields()) {
+				if (Modifier.isStatic(f.getModifiers())) {
+					fos.write(String.format("%s=%s\r\n", f.getName(), f.get(null).toString()).getBytes());
+				}
+			}
+			
+			fos.close();
+		}  catch (Exception e) {
+			e.printStackTrace();
+		} finally {
 			if (fos != null) {
 				try {
 					fos.close();

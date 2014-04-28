@@ -34,7 +34,10 @@ public class Boid extends ITargetable {
 	private boolean mStopMoving;
 	
 	private Color mColor;
+	
 	private float mEnergy;
+	private int mRepDelay;
+	
 	private int mAge;
 	
 	public Boid(Boid parent, int energy) {
@@ -68,6 +71,7 @@ public class Boid extends ITargetable {
 	
 	private void recalculate() {
 		mColor = new Color((int) mGenome.get(Gene.Red), (int) mGenome.get(Gene.Green), (int) mGenome.get(Gene.Blue));
+		mRepDelay = (int) mGenome.get(Gene.RepDelay);
 	}
 	
 	public void update() {
@@ -104,11 +108,12 @@ public class Boid extends ITargetable {
 				if (mTarget instanceof PlantIdentifier) {
 					PlantIdentifier plant = (PlantIdentifier) mTarget;
 					
-					energy = World.plants.eat(plant, 1);
+					energy = World.plants.eat(plant, EAT_PLANT_SPEED);
 				} else if (mTarget instanceof Boid) {
 					Boid boid = (Boid) mTarget;
 					
-					energy = World.boids.eat(boid, 10, (float) mGenome.get(Gene.Aggressiveness));
+					float aggressiveness = (float) mGenome.get(Gene.Aggressiveness);
+					energy = World.boids.eat(boid, EAT_BOID_SPEED, aggressiveness);
 				}
 				
 				// Waste
@@ -140,7 +145,6 @@ public class Boid extends ITargetable {
 				
 				// Update target once a second
 				if (--mCheckDelay < 0) {
-					mCheckDelay = 20;
 					mTarget = getTarget();
 				}
 			}
@@ -149,7 +153,7 @@ public class Boid extends ITargetable {
 		// -------------------------------
 		// If has energy then reproduce
 		// -------------------------------
-		if (mEnergy > mGenome.get(Gene.MinRepEnergy)) {
+		if (--mRepDelay < 0 && mEnergy > mGenome.get(Gene.MinRepEnergy)) {
 			reproduce((int) mGenome.get(Gene.MinGiveEnergy));
 		}
 		
@@ -192,8 +196,10 @@ public class Boid extends ITargetable {
 	
 	private ITargetable getTarget() {		
 		if (isCarnivore()) {
+			mCheckDelay = 40;
 			return World.boids.findNearest(this);
 		} else {
+			mCheckDelay = 20;
 			return World.plants.findNearest(this);
 		}
 	}
@@ -208,6 +214,7 @@ public class Boid extends ITargetable {
 		boolean added = World.boids.add(b);
 		
 		if (added) {
+			mRepDelay = (int) mGenome.get(Gene.RepDelay);
 			mEnergy -= energy;
 		}
 	}
@@ -259,7 +266,7 @@ public class Boid extends ITargetable {
 	}
 	
 	public boolean isCarnivore() {
-		return mGenome.get(Gene.MetabolismRate) > 0.66;
+		return mGenome.get(Gene.MetabolismRate) > 0.9 && mGenome.get(Gene.Carnivore) > 0.5;
 	}
 	
 	public void stopMoving() {

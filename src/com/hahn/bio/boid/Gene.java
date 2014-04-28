@@ -2,18 +2,22 @@ package com.hahn.bio.boid;
 
 import static com.hahn.bio.util.Config.*;
 
+@SuppressWarnings("unused")
 public enum Gene {
 	MaxAge(add(add(add(mult(pos(gene(0)), 2), pos(gene(1))), abs(gene(3))), gene(5))),
 	Red(pos(gene(7))),
 	Green(pos(gene(9))),
 	Blue(pos(gene(11))),
+	RepDelay(add(add(pos(gene(12)), pos(gene(13))), 100)),
 	MinRepEnergy(add(add(pos(gene(15)), pos(gene(16))), 100)),
 	MinGiveEnergy(add(pos(gene(15)), 50)),
 	SpeedMult(mult(frac(gene(17)), 3)),
 	MetabolismRate(frac(gene(20))),
 	Aggressiveness(max(frac(gene(21)), 0.2f)),
+	Carnivore(frac(gene(22))),
 	TurnSpeed(mult(frac(gene(23)), MAX_TURN_SPEED)),
-	ViewRange(pos(gene(25)));
+	ViewRange(pos(gene(25))),
+	ViewAngleError(mult(frac(gene(27)), MAX_TURN_SPEED));
 	
 	public final OP Algorithm;
 	private Gene(OP algorithm) {
@@ -24,43 +28,43 @@ public enum Gene {
 		return Algorithm.getValue(g);
 	}
 	
-	static IEvaluable gene(int idx) {
+	private static IEvaluable gene(int idx) {
 		return new GenePointer(idx);
 	}
 	
-	static OP add(Object a, Object b) {
+	private static OP add(Object a, Object b) {
 		return new Add(a, b);
 	}
 	
-	static OP pos(Object a) {
+	private static OP pos(Object a) {
 		return add(a, -Byte.MIN_VALUE);
 	}
 	
-	static OP sub(Object a, Object b) {
+	private static OP sub(Object a, Object b) {
 		return new Sub(a, b);
 	}
 	
-	static OP abs(Object a) {
+	private static OP abs(Object a) {
 		return new Abs(a);
 	}
 	
-	static OP mult(Object a, Object b) {
+	private static OP mult(Object a, Object b) {
 		return new Mult(a, b);
 	}
 	
-	static OP div(Object a, Object b) {
+	private static OP div(Object a, Object b) {
 		return new Div(a, b);
 	}
 	
-	static OP frac(Object a) {
+	private static OP frac(Object a) {
 		return div(abs(a), Byte.MAX_VALUE);
 	}
 	
-	static OP max(Object a, Object b) {
+	private static OP max(Object a, Object b) {
 		return new Max(a, b);
 	}
 	
-	static class Max extends OP {
+	private static class Max extends OP {
 		public Max(Object a, Object b) { super(a, b); }
 
 		@Override
@@ -69,7 +73,7 @@ public enum Gene {
 		}
 	}
 	
-	static class Div extends OP {
+	private static class Div extends OP {
 		public Div(Object a, Object b) { super(a, b); }
 
 		@Override
@@ -78,7 +82,7 @@ public enum Gene {
 		}
 	}
 	
-	static class Mult extends OP {
+	private static class Mult extends OP {
 		public Mult(Object a, Object b) { super(a, b); }
 
 		@Override
@@ -87,7 +91,7 @@ public enum Gene {
 		}
 	}
 	
-	static class Abs extends OP {
+	private static class Abs extends OP {
 		public Abs(Object a) { super(a, null); }
 
 		@Override
@@ -96,7 +100,7 @@ public enum Gene {
 		}
 	}
 	
-	static class Sub extends OP {
+	private static class Sub extends OP {
 		public Sub(Object a, Object b) { super(a, b); }
 
 		@Override
@@ -105,7 +109,7 @@ public enum Gene {
 		}
 	}
 	
-	static class Add extends OP {
+	private static class Add extends OP {
 		public Add(Object a, Object b) { super(a, b); }
 
 		@Override
@@ -114,7 +118,7 @@ public enum Gene {
 		}
 	}
 	
-	static abstract class OP extends Constant {
+	private static abstract class OP extends Constant {
 		IEvaluable a, b;
 		
 		public OP(Object a, Object b) {
@@ -141,11 +145,11 @@ public enum Gene {
 		public abstract double getValue(Genome g);
 	}
 	
-	static interface IEvaluable {
+	private static interface IEvaluable {
 		public double getValue(Genome g);
 	}
 	
-	static class GenePointer implements IEvaluable {
+	private static class GenePointer implements IEvaluable {
 		int idx;
 		
 		public GenePointer(int idx) { 
@@ -158,7 +162,7 @@ public enum Gene {
 		}
 	}
 	
-	static class Constant implements IEvaluable {
+	private static class Constant implements IEvaluable {
 		Number d;
 		
 		public Constant(Number i) {
