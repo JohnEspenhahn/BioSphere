@@ -29,17 +29,21 @@ public class ConfigReader {
 							try {
 								Field f = clazz.getField(def[0].toUpperCase());
 								Class<?> type = f.getType();
-								if (type == Integer.class) {
+								if (type == Integer.class || type == int.class) {
 									f.setInt(null, Integer.valueOf(def[1]));
-								} else if (type == Float.class) {
+								} else if (type == Float.class || type == float.class) {
 									f.setFloat(null, Float.valueOf(def[1]));
-								} else if (type == Double.class) {
+								} else if (type == Double.class || type == double.class) {
 									f.setDouble(null, Double.valueOf(def[1]));
-								} else if (type == Boolean.class) {
+								} else if (type == Boolean.class || type == boolean.class) {
 									f.setBoolean(null, Boolean.valueOf(def[1]));
 								} else if (type == String.class) {
 									f.set(null, def[1]);
+								} else {
+									System.err.println("Unknown type " + type);
 								}
+								
+								System.out.printf("Set %s = %s\n", f.getName(), f.get(null));
 							} catch (NumberFormatException e) {
 								System.err.println("Invalid number format '" + def[1] + "' for '" + def[0].toUpperCase() + "'");
 							} catch (NoSuchFieldException e) {

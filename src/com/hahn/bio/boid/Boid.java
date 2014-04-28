@@ -69,8 +69,10 @@ public class Boid {
 		// -------------------------------
 		// Every tick update
 		// -------------------------------
+		double speed = mSpeed * mGenome.get(Gene.SpeedMult);
+		
 		mAge += 1;
-		mEnergy -= BOID_METABALIZE_SPEED + mSpeed * PERCENT_SPEED_TOWARD_METABOLISM;
+		mEnergy -= BOID_METABALIZE_SPEED + speed * PERCENT_SPEED_TOWARD_METABOLISM;
 		
 		if (mAge > mGenome.get(Gene.MaxAge)) {
 			mEnergy -= BOID_METABALIZE_SPEED * 2;
@@ -98,6 +100,10 @@ public class Boid {
 					
 					// Add energy left
 					mEnergy += energy;
+					
+					if (mTarget.isGone()) {
+						mTarget = null;
+					}
 				}
 				
 			// Otherwise not at target and need to update direction
@@ -119,7 +125,7 @@ public class Boid {
 				
 				// Update target once a second
 				if (--mCheckDelay < 0) {
-					mCheckDelay = 20;
+					mCheckDelay = 30;
 					mTarget = World.plants.findNearest(mLoc);
 				}
 			}
@@ -128,8 +134,8 @@ public class Boid {
 		// -------------------------------
 		// If has energy then reproduce
 		// -------------------------------
-		if (mEnergy > START_BOID_ENERGY * 2) {
-			reproduce(START_BOID_ENERGY);
+		if (mEnergy > mGenome.get(Gene.MinRepEnergy)) {
+			reproduce((int) mGenome.get(Gene.MinGiveEnergy));
 		}
 		
 		
@@ -151,11 +157,13 @@ public class Boid {
 			mMoveDir.add(-5);
 		}
 		
+		// Update speed for next tick
 		mSpeed = output[2] + 0.5f;
 		if (mSpeed < 0) mSpeed = 0;
 		
-		mLoc.x += mMoveDir.x * mSpeed;
-		mLoc.y += mMoveDir.y * mSpeed;
+		// Move with this tick's speed
+		mLoc.x += mMoveDir.x * speed;
+		mLoc.y += mMoveDir.y * speed;
 		
 		constrainLocation();
 	}
@@ -189,6 +197,11 @@ public class Boid {
 		
 		g.setColor(Color.white);
 		g.drawLine(mLoc.x, mLoc.y, mLoc.x + mMoveDir.x * 8, mLoc.y + mMoveDir.y * 8);
+		
+		if (DEBUG && mTarget != null) {
+			g.setColor(Color.red);
+			g.drawLine(mLoc.x, mLoc.y, mTarget.getX(), mTarget.getY());
+		}
 	}
 	
 	public int getDirection(Vector2f p1, Vector2f p2) {

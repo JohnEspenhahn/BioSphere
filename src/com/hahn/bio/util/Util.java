@@ -32,7 +32,7 @@ public class Util {
 	 * Mutates DEFAULT_MUTATE_CHANCE % of values in array by [-maxAmnt, maxAmnt)
 	 */
 	public static void mutate(float[] vals, float maxAmnt) {
-		Util.mutate(vals, maxAmnt, DEFAULT_MUTATE_CHANCE);
+		Util.mutate(vals, maxAmnt, ANN_MUTATE_CHANCE);
 	}
 	
 	/**

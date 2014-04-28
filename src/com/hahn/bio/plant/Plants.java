@@ -107,10 +107,12 @@ public class Plants extends Kernel {
 	}
 	
 	public void kill(PlantIdentifier plant) {
-		mEnergy[plant.id] = 0;
-		mRadius[plant.id] = 0;
-		
-		mFreeSlots.push(plant.id);
+		if (mEnergy[plant.id] > 0) {
+			mEnergy[plant.id] = 0;
+			mRadius[plant.id] = 0;
+			
+			mFreeSlots.push(plant.id);
+		}
 	}
 	
 	public int getRadius(PlantIdentifier plant) {

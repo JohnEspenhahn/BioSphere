@@ -30,7 +30,7 @@ public class Genome {
 	private void mutate() {
 		for (int i = 0; i < bGenome.length; i++) {
 			for (int j = 0; j < 8; j++) {
-				if (World.rand.nextFloat() < DEFAULT_MUTATE_CHANCE) {
+				if (World.rand.nextFloat() < GENOME_MUTATE_CHANGE) {
 					bGenome[i] ^= (1 << j);
 				}
 			}

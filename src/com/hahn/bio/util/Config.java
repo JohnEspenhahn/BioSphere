@@ -13,7 +13,8 @@ public final class Config {
 						BOID_METABALIZE_SPEED = 0.1f,
 						PERCENT_SPEED_TOWARD_METABOLISM = 0.5f;
 	
-	public static float DEFAULT_MUTATE_CHANCE = 0.01f;
+	public static float ANN_MUTATE_CHANCE = 0.01f,
+						GENOME_MUTATE_CHANGE = 0.001f;
 	
 	public static boolean DEBUG = false;
 }
