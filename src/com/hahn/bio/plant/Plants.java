@@ -51,6 +51,7 @@ public class Plants extends Kernel {
 	
 	private void init() {
 		setExplicit(true);
+		dispose();
 		
 		for (int id = 0; id < mSize[0]; id++) {
 			mXs[id] = rand.nextInt(WORLD_SIZE);

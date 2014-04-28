@@ -13,6 +13,7 @@ import org.newdawn.slick.SlickException;
 import com.hahn.bio.util.Camera;
 import com.hahn.bio.util.Config;
 import com.hahn.bio.util.ConfigIO;
+import com.hahn.bio.util.LibIO;
 
 import static com.hahn.bio.util.Config.WORLD_SIZE;
 
@@ -84,6 +85,8 @@ public class MainGame extends BasicGame {
 	}
 
 	public static void main(String[] args) {
+		LibIO.extract();
+		
 		try {
 			AppGameContainer appgc;
 			appgc = new AppGameContainer(new MainGame());

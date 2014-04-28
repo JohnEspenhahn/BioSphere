@@ -44,6 +44,7 @@ public class Boids extends Kernel {
 	
 	private void init() {
 		setExplicit(true);
+		dispose();
 		
 		Arrays.fill(mXs, -1);
 		Arrays.fill(mYs, -1);
