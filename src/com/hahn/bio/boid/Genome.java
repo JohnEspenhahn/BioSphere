@@ -11,8 +11,10 @@ public class Genome {
 	private byte[] bGenome;
 	private Map<Gene, Double> genome;
 	
+	private int red, green, blue;
+	
 	public Genome() {
-		bGenome = new byte[128];
+		bGenome = new byte[30];
 		
 		World.rand.nextBytes(bGenome);
 		
@@ -43,6 +45,29 @@ public class Genome {
 		for (Gene g: Gene.values()) {
 			genome.put(g, g.calculate(this));
 		}
+		
+		int redTier   = (int) (bGenome.length * (1.0/3.0));
+		int greenTier = (int) (bGenome.length * (2.0/3.0));
+		int blueTier  = (int) (bGenome.length * (3.0/3.0));
+		for (int i = 0; i < bGenome.length; i++) {
+			int val = bGenome[i];
+			for (int b = 0; b < 8; b++) {
+				if ((val & (1 << b)) != 0) {
+					if (i < redTier) {
+						red += 1;
+					} else if (i < greenTier) {
+						green += 1;
+					} else if (i < blueTier) {
+						blue += 1;
+					}
+				}
+			}
+		}
+		
+		double bitsPerColor = bGenome.length * 8 / 3.0;
+		red   = (int) ((double) red   / bitsPerColor * 255);
+		green = (int) ((double) green / bitsPerColor * 255);
+		blue  = (int) ((double) blue  / bitsPerColor * 255);
 	}
 	
 	public double get(Gene g) {
@@ -55,5 +80,17 @@ public class Genome {
 	
 	public byte getGeneAt(int idx) {
 		return bGenome[idx];
+	}
+	
+	public int getRed() {
+		return red;
+	}
+	
+	public int getGreen() {
+		return green;
+	}
+	
+	public int getBlue() {
+		return blue;
 	}
 }

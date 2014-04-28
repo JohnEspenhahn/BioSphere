@@ -5,9 +5,6 @@ import static com.hahn.bio.util.Config.*;
 @SuppressWarnings("unused")
 public enum Gene {
 	MaxAge(add(add(add(mult(pos(gene(0)), 2), pos(gene(1))), abs(gene(3))), gene(5))),
-	Red(pos(gene(7))),
-	Green(pos(gene(9))),
-	Blue(pos(gene(11))),
 	RepDelay(add(add(pos(gene(12)), pos(gene(13))), 100)),
 	MinRepEnergy(add(add(pos(gene(15)), pos(gene(16))), 100)),
 	MinGiveEnergy(add(pos(gene(15)), 50)),

@@ -70,7 +70,7 @@ public class Boid extends ITargetable {
 	}
 	
 	private void recalculate() {
-		mColor = new Color((int) mGenome.get(Gene.Red), (int) mGenome.get(Gene.Green), (int) mGenome.get(Gene.Blue));
+		mColor = new Color(mGenome.getRed(), mGenome.getGreen(), mGenome.getBlue());
 		mRepDelay = (int) mGenome.get(Gene.RepDelay);
 	}
 	
