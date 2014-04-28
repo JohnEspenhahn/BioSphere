@@ -20,6 +20,7 @@ public class Boids extends Kernel {
 	
 	private int[] mXs;
 	private int[] mYs;
+	private boolean[] mIsCarnivore;
 	
 	private Boid[] mBoids;
 	
@@ -31,6 +32,7 @@ public class Boids extends Kernel {
 		
 		mXs = new int[max];
 		mYs = new int[max];
+		mIsCarnivore = new boolean[max];
 		
 		mBoids = new Boid[max];
 		
@@ -95,6 +97,7 @@ public class Boids extends Kernel {
 		
 		put(mXs);
 		put(mYs);
+		put(mIsCarnivore);
 	}
 	
 	public boolean add(Boid b) {
@@ -105,6 +108,8 @@ public class Boids extends Kernel {
 			
 			mXs[id] = (int) b.getX();
 			mYs[id] = (int) b.getY();
+			mIsCarnivore[id] = b.isCarnivore();
+			
 			mBoids[id] = b;
 			
 			return true;
@@ -172,8 +177,9 @@ public class Boids extends Kernel {
 		int id = getGlobalId();
 		int thisX = mXs[id];
 		int thisY = mYs[id];
+		boolean thisIsCarnivore = mIsCarnivore[id];
 		
-		if (id != rId && thisX >= 0 && thisY >= 0) {
+		if (id != rId && !thisIsCarnivore && thisX >= 0 && thisY >= 0) {
 			int distSqu = distanceSqu(rX, rY, thisX, thisY);
 			
 			if (distSqu < mResponse[0]) {

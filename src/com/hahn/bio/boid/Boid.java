@@ -140,7 +140,7 @@ public class Boid extends ITargetable {
 				
 				// Update target once a second
 				if (--mCheckDelay < 0) {
-					mCheckDelay = 30;
+					mCheckDelay = 20;
 					mTarget = getTarget();
 				}
 			}
@@ -190,21 +190,12 @@ public class Boid extends ITargetable {
 		input[2] = 1;
 	}
 	
-	private ITargetable getTarget() {
-		ITargetable nearest = World.plants.findNearest(this);
-		
+	private ITargetable getTarget() {		
 		if (isCarnivore()) {
-			int viewRange = (int) mGenome.get(Gene.ViewRange);
-			if (nearest.distanceSquared(this) > viewRange*viewRange) {
-				ITargetable boid = World.boids.findNearest(this);
-				
-				if (boid.distanceSquared(this) <= viewRange*viewRange) {
-					nearest = boid;
-				}
-			}
+			return World.boids.findNearest(this);
+		} else {
+			return World.plants.findNearest(this);
 		}
-		
-		return nearest;
 	}
 	
 	public void constrainLocation() {
