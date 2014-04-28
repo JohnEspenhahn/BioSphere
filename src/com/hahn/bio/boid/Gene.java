@@ -1,5 +1,7 @@
 package com.hahn.bio.boid;
 
+import static com.hahn.bio.util.Config.*;
+
 public enum Gene {
 	MaxAge(add(add(add(mult(pos(gene(0)), 2), pos(gene(1))), abs(gene(3))), gene(5))),
 	Red(pos(gene(7))),
@@ -7,7 +9,11 @@ public enum Gene {
 	Blue(pos(gene(11))),
 	MinRepEnergy(add(add(pos(gene(15)), pos(gene(16))), 100)),
 	MinGiveEnergy(add(pos(gene(15)), 50)),
-	SpeedMult(mult(frac(gene(17)), 3));
+	SpeedMult(mult(frac(gene(17)), 3)),
+	MetabolismRate(frac(gene(20))),
+	Aggressiveness(max(frac(gene(21)), 0.2f)),
+	TurnSpeed(mult(frac(gene(23)), MAX_TURN_SPEED)),
+	ViewRange(pos(gene(25)));
 	
 	public final OP Algorithm;
 	private Gene(OP algorithm) {
@@ -47,7 +53,20 @@ public enum Gene {
 	}
 	
 	static OP frac(Object a) {
-		return div(abs(a), (int) Byte.MAX_VALUE);
+		return div(abs(a), Byte.MAX_VALUE);
+	}
+	
+	static OP max(Object a, Object b) {
+		return new Max(a, b);
+	}
+	
+	static class Max extends OP {
+		public Max(Object a, Object b) { super(a, b); }
+
+		@Override
+		public double getValue(Genome g) {
+			return Math.max(a.getValue(g), b.getValue(g));
+		}
 	}
 	
 	static class Div extends OP {
@@ -105,7 +124,7 @@ public enum Gene {
 				if (a instanceof IEvaluable) {
 					this.a = (IEvaluable) a;
 				} else {
-					this.a = new Constant((double) a);
+					this.a = new Constant((Number) a);
 				}
 			}
 			
@@ -113,7 +132,7 @@ public enum Gene {
 				if (b instanceof IEvaluable) {
 					this.b = (IEvaluable) b;
 				} else {
-					this.b = new Constant((double) b);
+					this.b = new Constant((Number) b);
 				}
 			}
 		}
@@ -140,14 +159,14 @@ public enum Gene {
 	}
 	
 	static class Constant implements IEvaluable {
-		double d;
+		Number d;
 		
-		public Constant(double i) {
+		public Constant(Number i) {
 			this.d = i;
 		}
 		
 		public double getValue(Genome g) {
-			return d;
+			return d.doubleValue();
 		}
 	}
 }

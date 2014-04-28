@@ -13,8 +13,10 @@ import com.hahn.bio.plant.ITargetable;
 import com.hahn.bio.plant.PlantIdentifier;
 import com.hahn.bio.util.Util;
 
-public class Boid {
-	public static final int RADIUS = 5;
+public class Boid extends ITargetable {
+	public static int RADIUS = 6;
+	
+	private Integer mId;
 	
 	private World mWorld;
 	private Brain mBrain;
@@ -29,6 +31,8 @@ public class Boid {
 	private Vector2f mMoveDir;
 	private float mSpeed;
 
+	private boolean mStopMoving;
+	
 	private Color mColor;
 	private float mEnergy;
 	private int mAge;
@@ -57,6 +61,7 @@ public class Boid {
 		
 		mTarget = null;
 		mEnergy = energy;
+		mStopMoving = false;
 		
 		recalculate();
 	}
@@ -66,6 +71,12 @@ public class Boid {
 	}
 	
 	public void update() {
+		if (mStopMoving) {
+			mEnergy -= BOID_METABALIZE_SPEED / 2;
+			
+			return;
+		}
+		
 		// -------------------------------
 		// Every tick update
 		// -------------------------------
@@ -80,7 +91,7 @@ public class Boid {
 		
 		// If no target then find one
 		if (mTarget == null || mTarget.isGone()) {
-			mTarget = World.plants.findNearest(mLoc);
+			mTarget = getTarget();
 			return;
 			
 		} else {
@@ -89,21 +100,25 @@ public class Boid {
 			if (distSqu < RADIUS*RADIUS + mTarget.getRadius()*mTarget.getRadius()) {
 				clearInputs();
 				
+				float energy = 0;
 				if (mTarget instanceof PlantIdentifier) {
 					PlantIdentifier plant = (PlantIdentifier) mTarget;
 					
-					// Get removed energy
-					float energy = World.plants.eat(plant, 5);
+					energy = World.plants.eat(plant, 1);
+				} else if (mTarget instanceof Boid) {
+					Boid boid = (Boid) mTarget;
 					
-					// Waste
-					energy *= 0.55f;
-					
-					// Add energy left
-					mEnergy += energy;
-					
-					if (mTarget.isGone()) {
-						mTarget = null;
-					}
+					energy = World.boids.eat(boid, 10, (float) mGenome.get(Gene.Aggressiveness));
+				}
+				
+				// Waste
+				energy *= mGenome.get(Gene.MetabolismRate);
+				
+				// Add energy left
+				mEnergy += energy;
+				
+				if (mTarget.isGone()) {
+					mTarget = null;
 				}
 				
 			// Otherwise not at target and need to update direction
@@ -126,7 +141,7 @@ public class Boid {
 				// Update target once a second
 				if (--mCheckDelay < 0) {
 					mCheckDelay = 30;
-					mTarget = World.plants.findNearest(mLoc);
+					mTarget = getTarget();
 				}
 			}
 		}
@@ -151,10 +166,10 @@ public class Boid {
 		float[] output = mBrain.getOutput();		
 		if (output[0] > output[1]) {
 			// Right
-			mMoveDir.add(5);
+			mMoveDir.add(mGenome.get(Gene.TurnSpeed));
 		} else {
 			// Left
-			mMoveDir.add(-5);
+			mMoveDir.add(-mGenome.get(Gene.TurnSpeed));
 		}
 		
 		// Update speed for next tick
@@ -175,32 +190,65 @@ public class Boid {
 		input[2] = 1;
 	}
 	
+	private ITargetable getTarget() {
+		ITargetable nearest = World.plants.findNearest(this);
+		
+		if (isCarnivore()) {
+			int viewRange = (int) mGenome.get(Gene.ViewRange);
+			if (nearest.distanceSquared(this) > viewRange*viewRange) {
+				ITargetable boid = World.boids.findNearest(this);
+				
+				if (boid.distanceSquared(this) <= viewRange*viewRange) {
+					nearest = boid;
+				}
+			}
+		}
+		
+		return nearest;
+	}
+	
 	public void constrainLocation() {
 		mLoc.x = Util.constrain(mLoc.x, 0, WORLD_SIZE);
 		mLoc.y = Util.constrain(mLoc.y, 0, WORLD_SIZE);
 	}
 	
-	public void reproduce(int energy) {
-		mEnergy -= energy;
-		
+	public void reproduce(int energy) {		
 		Boid b = new Boid(this, energy);
-		mWorld.addBoid(b);
+		boolean added = World.boids.add(b);
+		
+		if (added) {
+			mEnergy -= energy;
+		}
 	}
 	
 	public void kill() {
-		
+		mEnergy = -1;
 	}
 	
 	public void draw(Graphics g) {
 		g.setColor(mColor);
-		g.fill(new Circle(mLoc.x, mLoc.y, RADIUS));
+		g.fill(new Circle(mLoc.x, mLoc.y, getRadius()));
 		
-		g.setColor(Color.white);
-		g.drawLine(mLoc.x, mLoc.y, mLoc.x + mMoveDir.x * 8, mLoc.y + mMoveDir.y * 8);
-		
-		if (DEBUG && mTarget != null) {
-			g.setColor(Color.red);
-			g.drawLine(mLoc.x, mLoc.y, mTarget.getX(), mTarget.getY());
+		if (!mStopMoving) {
+			if (isCarnivore()) {
+				g.setColor(Color.red);
+			} else {
+				g.setColor(Color.white);
+			}
+	
+			g.drawLine(mLoc.x, mLoc.y, mLoc.x + mMoveDir.x * 8, mLoc.y + mMoveDir.y * 8);
+			
+			if (DEBUG) {
+				if (isCarnivore()) {
+					g.setColor(Color.yellow);
+					g.draw(new Circle(mLoc.x, mLoc.y, (float) mGenome.get(Gene.ViewRange)));
+				}
+				
+				if (mTarget != null) {
+					g.setColor(Color.red);
+					g.drawLine(mLoc.x, mLoc.y, mTarget.getX(), mTarget.getY());
+				}
+			}
 		}
 	}
 	
@@ -211,7 +259,60 @@ public class Boid {
 		else return -1;
 	}
 	
+	public void setId(int id) {
+		if (mId == null) {
+			mId = id;
+		} else {
+			throw new RuntimeException("Tried to set boid id twice!");
+		}
+	}
+	
+	public boolean isCarnivore() {
+		return mGenome.get(Gene.MetabolismRate) > 0.66;
+	}
+	
+	public void stopMoving() {
+		mStopMoving = true;
+	}
+	
+	public void removeEnergy(float amnt) {
+		mEnergy -= amnt;
+	}
+	
+	public float getEnergy() {
+		return mEnergy;
+	}
+	
+	public int getId() {
+		return mId;
+	}
+	
 	public boolean isAlive() {
 		return mEnergy > 0;
+	}
+	
+	@Override
+	public int getX() {
+		return (int) mLoc.x;
+	}
+	
+	@Override
+	public int getY() {
+		return (int) mLoc.y;
+	}
+
+	@Override
+	public Vector2f getLoc() {
+		return mLoc;
+	}
+
+	@Override
+	public int getRadius() {
+		return RADIUS;
+	}
+
+	@Override
+	public boolean isGone() {
+		return !isAlive();
 	}
 }

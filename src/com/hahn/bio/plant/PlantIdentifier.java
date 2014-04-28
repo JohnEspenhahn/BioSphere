@@ -4,7 +4,7 @@ import org.newdawn.slick.geom.Vector2f;
 
 import com.hahn.bio.World;
 
-public class PlantIdentifier implements ITargetable {
+public class PlantIdentifier extends ITargetable {
 	public final int id;
 	public final Vector2f loc;
 	

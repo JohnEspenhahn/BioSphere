@@ -35,7 +35,7 @@ public class MainGame extends BasicGame {
 			
 			g.translate(mCamera.getX(), mCamera.getY());
 			
-			g.drawString("Boids: " + mWorld.getBoids().size(), 10, 30);
+			g.drawString("Boids: " + World.boids.size(), 10, 30);
 		}
 	}
 
@@ -65,6 +65,8 @@ public class MainGame extends BasicGame {
 			mCamera.setVelY(-10);
 		} else if (key == Keyboard.KEY_DOWN) {
 			mCamera.setVelY(10);
+		} else if (key == Keyboard.KEY_D) {
+			Config.DEBUG = !Config.DEBUG;
 		}
 	}
 	

@@ -1,18 +1,21 @@
 package com.hahn.bio.plant;
 
 import static com.hahn.bio.World.rand;
-import static com.hahn.bio.util.Config.*;
+import static com.hahn.bio.util.Config.MAX_PLANTS;
+import static com.hahn.bio.util.Config.PLANT_GROW_SPEED;
+import static com.hahn.bio.util.Config.START_PLANT_ENERGY;
+import static com.hahn.bio.util.Config.WORLD_SIZE;
 
 import java.util.Stack;
 
 import org.newdawn.slick.Color;
 import org.newdawn.slick.Graphics;
 import org.newdawn.slick.geom.Circle;
-import org.newdawn.slick.geom.Vector2f;
 
 import com.amd.aparapi.Kernel;
 import com.amd.aparapi.Range;
 import com.hahn.bio.MainGame;
+import com.hahn.bio.boid.Boid;
 
 public class Plants extends Kernel {
 	public static final int FIND_NEAREST = 0;
@@ -26,6 +29,7 @@ public class Plants extends Kernel {
 	private final int[] mSize = new int[1];
 	
 	private final int[] mXs, mYs;
+	
 	private final float[] mEnergy;
 	private final int[] mRadius;
 	
@@ -72,10 +76,10 @@ public class Plants extends Kernel {
 		return plants;
 	}
 	
-	public PlantIdentifier findNearest(Vector2f point) {
+	public PlantIdentifier findNearest(Boid b) {
 		mRequest[0] = FIND_NEAREST;
-		mRequest[1] = (int) point.x;
-		mRequest[2] = (int) point.y;
+		mRequest[1] = b.getX();
+		mRequest[2] = b.getY();
 		
 		mResponse[2] = Integer.MAX_VALUE;
 		
@@ -170,7 +174,7 @@ public class Plants extends Kernel {
 				}
 				
 				mRadius[id] = (int) Math.sqrt(mEnergy[id] / 4);
-				if (mRadius[id] <= 1) mRadius[id] = 2;
+				if (mRadius[id] < 5) mRadius[id] = 5;
 				
 				g.fill(new Circle(mXs[id], mYs[id], mRadius[id]));
 			}
