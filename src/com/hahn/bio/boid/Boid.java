@@ -51,7 +51,7 @@ public class Boid extends ITargetable {
 	
 	public Boid(World world, float x, float y, int energy) {
 		mWorld = world;
-		mBrain = Brain.create(3, 4, 3);
+		mBrain = Brain.create(2, 3, 2);
 		mGenome = new Genome();
 		
 		mLoc = new Vector2f(x, y);
@@ -129,18 +129,21 @@ public class Boid extends ITargetable {
 			// Otherwise not at target and need to update direction
 			} else {
 				Vector2f targVec = new Vector2f(mTarget.getX() - mLoc.x, mTarget.getY() - mLoc.y).normalise();
-				int dir = getDirection(mMoveDir, targVec);
-				
 				float[] input = mBrain.getInput();
-				input[2] = 0;
-				if (dir < 0) {
-					// Left
-					input[0] = 1;
-					input[1] = 0;
-				} else {
-					// Right
+				input[1] = 1;
+				
+				int dir = getDirection(mMoveDir, targVec);
+				if (isInViewAngleError(mMoveDir, targVec, dir)) {
+					// Forward
 					input[0] = 0;
-					input[1] = 1;
+				} else {
+					if (dir < 0) {
+						// Left
+						input[0] = -1;
+					} else {
+						// Right
+						input[0] = 1;
+					}
 				}
 				
 				// Update target once a second
@@ -167,17 +170,19 @@ public class Boid extends ITargetable {
 		// -------------------------------
 		// Move based on ANN output
 		// -------------------------------
-		float[] output = mBrain.getOutput();		
-		if (output[0] > output[1]) {
+		float[] output = mBrain.getOutput();
+		if (output[0] > 0.2) {
 			// Right
 			mMoveDir.add(mGenome.get(Gene.TurnSpeed));
-		} else {
+		} else if (output[0] < -0.2) {
 			// Left
 			mMoveDir.add(-mGenome.get(Gene.TurnSpeed));
+		} else {
+			// Forward
 		}
 		
 		// Update speed for next tick
-		mSpeed = output[2] + 0.5f;
+		mSpeed = output[1] + 0.5f;
 		if (mSpeed < 0) mSpeed = 0;
 		
 		// Move with this tick's speed
@@ -187,11 +192,14 @@ public class Boid extends ITargetable {
 		constrainLocation();
 	}
 	
+	private boolean isInViewAngleError(Vector2f mMoveDir2, Vector2f targVec, int dir) {
+		return (dir < mGenome.get(Gene.ViewAngleError) && mMoveDir.dot(targVec) >= 0);
+	}
+
 	private void clearInputs() {
 		float[] input = mBrain.getInput();
 		input[0] = 0;
 		input[1] = 0;
-		input[2] = 1;
 	}
 	
 	private ITargetable getTarget() {		

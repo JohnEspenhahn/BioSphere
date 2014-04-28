@@ -174,7 +174,7 @@ public class Plants extends Kernel {
 				}
 				
 				mRadius[id] = (int) Math.sqrt(mEnergy[id] / 4);
-				if (mRadius[id] < 5) mRadius[id] = 5;
+				if (mRadius[id] < Boid.RADIUS) mRadius[id] = Boid.RADIUS;
 				
 				g.fill(new Circle(mXs[id], mYs[id], mRadius[id]));
 			}

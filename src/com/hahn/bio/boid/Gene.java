@@ -13,11 +13,11 @@ public enum Gene {
 	MinGiveEnergy(add(pos(gene(15)), 50)),
 	SpeedMult(mult(frac(gene(17)), 3)),
 	MetabolismRate(frac(gene(20))),
-	Aggressiveness(max(frac(gene(21)), 0.2f)),
+	Aggressiveness(div(frac(gene(21)), 8)),
 	Carnivore(frac(gene(22))),
 	TurnSpeed(mult(frac(gene(23)), MAX_TURN_SPEED)),
 	ViewRange(pos(gene(25))),
-	ViewAngleError(mult(frac(gene(27)), MAX_TURN_SPEED));
+	ViewAngleError(div(frac(gene(27)), 2));
 	
 	public final OP Algorithm;
 	private Gene(OP algorithm) {
