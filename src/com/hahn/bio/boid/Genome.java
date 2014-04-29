@@ -92,6 +92,8 @@ public class Genome {
 		final int xStep = 8;
 		final int rowLength = 8;
 		
+		int same = 0, total = 0;
+		
 		int y = 55;
 		
 		for (int i = 0; i < mGenomeBytes.length; i += rowLength, y += yStep) {
@@ -109,7 +111,11 @@ public class Genome {
 						int compareMaskedByte = (compareByte & (1 << k));
 						if (maskedByte != compareMaskedByte) {
 							g.setColor(Color.red);
+						} else {
+							same += 1;
 						}
+						
+						total += 1;
 					}
 					
 					if (maskedByte != 0) {
@@ -119,6 +125,11 @@ public class Genome {
 					}
 				}
 			}
+		}
+		
+		if (total > 0) {
+			g.setColor(Color.white);
+			g.drawString(String.format("Match: %f%%", (float) same / total * 100), 225, 325);
 		}
 	}
 	
