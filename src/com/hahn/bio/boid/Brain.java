@@ -42,6 +42,8 @@ public class Brain {
 		}
 		
 		this.mOutput = new float[out];
+		
+		genome.setBrainEnd(brainGene);
 	}
 	
 	private void init() {

@@ -16,11 +16,12 @@ public class Genome {
 	private Map<Gene, Double> mGenome;
 	
 	private int mRed, mGreen, mBlue;
-	private int mBrainStart;
+	
+	private final int mBrainStart = 32;
+	private int mBrainEnd;
 	
 	public Genome() {
-		mGenomeBytes = new byte[128];
-		mBrainStart = 32;
+		mGenomeBytes = new byte[64];
 		
 		World.rand.nextBytes(mGenomeBytes);
 		
@@ -104,7 +105,11 @@ public class Genome {
 				for (int k = 0; k < 8; k++, x += xStep) {
 					int maskedByte = (b & (1 << k));
 					
-					g.setColor(Color.white);
+					if (i + j >= mBrainStart && i + j < mBrainEnd) {
+						g.setColor(Color.blue);
+					} else {
+						g.setColor(Color.white);
+					}
 					
 					if (compare != null) {
 						int compareByte = compare.mGenomeBytes[i + j];
@@ -150,6 +155,10 @@ public class Genome {
 	
 	public int getBrainStart() {
 		return mBrainStart;
+	}
+	
+	public void setBrainEnd(int i) {
+		mBrainEnd = i;
 	}
 	
 	public int getRed() {

@@ -45,7 +45,6 @@ public class LibIO {
 				}
 			} catch (FileNotFoundException e) {
 				System.err.println("Failed to find jar");
-				e.printStackTrace();
 			} catch (IOException e) {
 				e.printStackTrace();
 			} finally {
