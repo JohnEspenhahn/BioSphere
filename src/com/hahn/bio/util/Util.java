@@ -1,7 +1,5 @@
 package com.hahn.bio.util;
 
-import static com.hahn.bio.util.Config.*;
-
 import org.newdawn.slick.geom.Vector2f;
 
 import com.hahn.bio.World;
@@ -28,13 +26,6 @@ public class Util {
 		for (int i = 0; i < vals.length; i++) {
 			vals[i] = (World.rand.nextFloat() * 2 - 1) * max;
 		}
-	}
-
-	/**
-	 * Mutates DEFAULT_MUTATE_CHANCE % of values in array by [-maxAmnt, maxAmnt)
-	 */
-	public static void mutate(float[] vals, float maxAmnt) {
-		Util.mutate(vals, maxAmnt, ANN_MUTATE_CHANCE);
 	}
 	
 	/**

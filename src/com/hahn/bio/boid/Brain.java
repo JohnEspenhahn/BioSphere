@@ -2,8 +2,6 @@ package com.hahn.bio.boid;
 
 import java.util.Arrays;
 
-import com.hahn.bio.util.Util;
-
 public class Brain {
 	private final float[] mSigmoidLookup = new float[201];
 	
@@ -16,42 +14,42 @@ public class Brain {
 	
 	private final float[] mOutput;
 	
-	private Brain(int in, int hidden, int out) {
+	private Brain(Genome genome) {
 		this.setupSigmoid();
 		
 		// Brain properties
+		final int in = 2, hidden = 3, out = 2;
+		int brainGene = genome.getBrainStart();
+		
 		this.mInput = new float[in];
+		
+		// Load hidden weights from genome
 		this.mInputWeights = new float[in * hidden];
-		Util.fillRandom(mInputWeights, 1);
+		for (int i = 0; i < mInputWeights.length; i++) {
+			int v = genome.getGeneAt(brainGene++);
+			
+			mInputWeights[i] = (float) v / Byte.MAX_VALUE;
+		}
 		
 		this.mHidden = new float[hidden];
+		
+		// Load output weights from genome
 		this.mHiddenWeights = new float[hidden * out];
-		Util.fillRandom(mHiddenWeights, 1);
+		for (int i = 0; i < mHiddenWeights.length; i++) {
+			int v = genome.getGeneAt(brainGene++);
+			
+			mHiddenWeights[i] = (float) v / Byte.MAX_VALUE;
+		}
 		
 		this.mOutput = new float[out];
-	}
-	
-	private Brain(Brain b) {
-		this.setupSigmoid();
-		
-		// Brain properties
-		this.mInput = b.mInput.clone();
-		this.mInputWeights = b.mInputWeights.clone();
-		Util.mutate(mInputWeights, 0.1f);
-		
-		this.mHidden = b.mHidden.clone();
-		this.mHiddenWeights = b.mHiddenWeights.clone();
-		Util.mutate(mHiddenWeights, 0.1f);
-		
-		this.mOutput = b.mOutput.clone();
 	}
 	
 	private void init() {
 		
 	}
 	
-	public static Brain create(int in, int hidden, int out) {
-		Brain brain = new Brain(in, hidden, out);
+	public static Brain create(Genome genome) {
+		Brain brain = new Brain(genome);
 		brain.init();
 		
 		return brain;
@@ -110,12 +108,5 @@ public class Brain {
 			float x = (i / 100.0f) - 1;
 			mSigmoidLookup[i] = (float) Math.tanh(x); // 2.0 / (1.0 + exp(-2.0 * x))
 		}
-	}
-	
-	public Brain reproduce() {
-		Brain b = new Brain(this);
-		b.init();
-		
-		return b;
 	}
 }

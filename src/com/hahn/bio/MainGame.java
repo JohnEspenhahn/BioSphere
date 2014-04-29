@@ -6,10 +6,12 @@ import java.util.logging.Logger;
 import org.lwjgl.input.Keyboard;
 import org.newdawn.slick.AppGameContainer;
 import org.newdawn.slick.BasicGame;
+import org.newdawn.slick.Color;
 import org.newdawn.slick.GameContainer;
 import org.newdawn.slick.Graphics;
 import org.newdawn.slick.SlickException;
 
+import com.hahn.bio.boid.Boid;
 import com.hahn.bio.util.Camera;
 import com.hahn.bio.util.Config;
 import com.hahn.bio.util.ConfigIO;
@@ -22,6 +24,8 @@ public class MainGame extends BasicGame {
 
 	private World mWorld;
 	private Camera mCamera;
+	
+	private Boid mSelected, mSelectedCompare;
 
 	public MainGame() {
 		super("BioSphere");
@@ -36,7 +40,34 @@ public class MainGame extends BasicGame {
 			
 			g.translate(mCamera.getX(), mCamera.getY());
 			
+			g.setColor(Color.white);
 			g.drawString("Boids: " + World.boids.size(), 10, 30);
+			
+			drawGenomeForSelected(g);
+		}
+	}
+	
+	private void drawGenomeForSelected(Graphics g) {
+		if (mSelected != null) {
+			if (mSelectedCompare != null && mSelectedCompare.isGone()) {
+				mSelectedCompare = null;
+			}
+			
+			if (mSelected.isGone()) {
+				mSelected = null;
+				mSelectedCompare = null;
+			} else {
+				mSelected.drawGenome(g, mSelectedCompare);
+				
+				g.setColor(Color.white);
+				g.drawString("Selected: " + mSelected.getId(), 150, 350);
+				g.drawString("Energy: " + mSelected.getEnergy(), 300, 350);
+				
+				if (mSelectedCompare != null) {
+					g.drawString("Compare:  " + mSelectedCompare.getId(), 150, 380);
+					g.drawString("Energy: " + mSelectedCompare.getEnergy(), 300, 380);
+				}
+			}
 		}
 	}
 
@@ -53,6 +84,20 @@ public class MainGame extends BasicGame {
 		if (container.getFPS() > 0) {
 			mCamera.update();
 			mWorld.update();
+		}
+	}
+	
+	@Override
+	public void mouseReleased(int button, int x, int y) {
+		x += mCamera.getX();
+		y += mCamera.getY();
+		
+		if (button == 0) {
+			Boid clicked = World.boids.getClicked(x, y); 
+			if (clicked != null) mSelected = clicked;
+		} else {
+			Boid clicked = World.boids.getClicked(x, y); 
+			if (clicked != null) mSelectedCompare = clicked;
 		}
 	}
 	
@@ -81,6 +126,9 @@ public class MainGame extends BasicGame {
 			mCamera.setVelY(0);
 		} else if (key == Keyboard.KEY_DOWN) {
 			mCamera.setVelY(0);
+		} else if (key == Keyboard.KEY_ESCAPE) {
+			mSelected = null;
+			mSelectedCompare = null;
 		}
 	}
 

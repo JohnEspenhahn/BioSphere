@@ -190,6 +190,19 @@ public class Boids extends Kernel {
 		}
 	}
 	
+	public Boid getClicked(int x, int y) {
+		for (Boid b: mBoids) {
+			if (b != null) {
+				int distSqu = distanceSqu(x, y, b.getX(), b.getY());
+				if (distSqu < b.getRadius()*b.getRadius()) {
+					return b;
+				}
+			}
+		}
+		
+		return null;
+	}
+	
 	private int distanceSqu(int x1, int y1, int x2, int y2) {
 		return (x2-x1)*(x2-x1) + (y2-y1)*(y2-y1);
 	}

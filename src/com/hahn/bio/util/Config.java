@@ -3,7 +3,7 @@ package com.hahn.bio.util;
 public final class Config {	
 	public static int WORLD_SIZE = 2048;
 	
-	public static int START_BOIDS = 64,
+	public static int START_BOIDS = 128,
 					  MAX_BOIDS = 256,
 					  MAX_PLANTS = 512;
 	
@@ -18,8 +18,7 @@ public final class Config {
 	
 	public static int MAX_TURN_SPEED = 10;
 	
-	public static float ANN_MUTATE_CHANCE = 0.01f,
-						GENOME_MUTATE_CHANGE = 0.001f;
+	public static float GENOME_MUTATE_CHANGE = 0.001f;
 	
 	public static boolean DEBUG = false;
 }

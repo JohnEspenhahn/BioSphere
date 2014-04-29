@@ -43,15 +43,13 @@ public class Boid extends ITargetable {
 	public Boid(Boid parent, int energy) {
 		this(parent.mWorld, parent.mLoc.x + rand.nextInt(100) - 50, parent.mLoc.y + rand.nextInt(100) - 50, energy);
 		
-		mBrain = parent.mBrain.reproduce();
 		mGenome = parent.mGenome.reproduce();
 		
-		recalculate();
+		createFromGenome();
 	}
 	
 	public Boid(World world, float x, float y, int energy) {
 		mWorld = world;
-		mBrain = Brain.create(2, 3, 2);
 		mGenome = new Genome();
 		
 		mLoc = new Vector2f(x, y);
@@ -66,10 +64,12 @@ public class Boid extends ITargetable {
 		mEnergy = energy;
 		mStopMoving = false;
 		
-		recalculate();
+		createFromGenome();
 	}
 	
-	private void recalculate() {
+	private void createFromGenome() {
+		mBrain = Brain.create(mGenome);
+		
 		mColor = new Color(mGenome.getRed(), mGenome.getGreen(), mGenome.getBlue());
 		mRepDelay = (int) mGenome.get(Gene.RepDelay);
 	}
@@ -256,6 +256,10 @@ public class Boid extends ITargetable {
 				}
 			}
 		}
+	}
+	
+	public void drawGenome(Graphics g, Boid compare) {
+		mGenome.draw(g, (compare == null ? null : compare.mGenome));
 	}
 	
 	public int getDirection(Vector2f p1, Vector2f p2) {
