@@ -14,7 +14,7 @@ public final class Config {
 						BOID_METABALIZE_SPEED = 0.1f,
 						EAT_PLANT_SPEED = 2,
 						EAT_BOID_SPEED = 4,
-						PERCENT_SPEED_TOWARD_METABOLISM = 0.3f;
+						PERCENT_SPEED_TOWARD_METABOLISM = 0.2f;
 	
 	public static int MAX_TURN_SPEED = 10;
 	

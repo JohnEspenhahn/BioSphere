@@ -9,7 +9,7 @@ public enum Gene {
 	MinRepEnergy(add(add(pos(gene(15)), pos(gene(16))), 100)),
 	MinGiveEnergy(add(pos(gene(15)), 50)),
 	SpeedMult(mult(frac(gene(17)), 3)),
-	MetabolismRate(frac(gene(20))),
+	MetabolismRate(max(frac(gene(20)), 0.5)),
 	Aggressiveness(div(frac(gene(21)), 8)),
 	Carnivore(frac(gene(22))),
 	TurnSpeed(mult(frac(gene(23)), MAX_TURN_SPEED)),

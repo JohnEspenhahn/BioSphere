@@ -89,9 +89,11 @@ public class Boid extends ITargetable {
 		mAge += 1;
 		mEnergy -= BOID_METABALIZE_SPEED + speed * PERCENT_SPEED_TOWARD_METABOLISM;
 		
+		/*
 		if (mAge > mGenome.get(Gene.MaxAge)) {
 			mEnergy -= BOID_METABALIZE_SPEED * 2;
 		}
+		*/
 		
 		// If no target then find one
 		if (mTarget == null || mTarget.isGone()) {
