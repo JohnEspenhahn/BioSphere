@@ -3,6 +3,11 @@ BioSphere
 
 Watch boids evolve their genome to improve their traits in a competitive environment.
 
+A new version of two of my pervious projects, impelemented to use the GPU. See the previous projects at:
+http://www.openprocessing.org/sketch/43490
+http://www.openprocessing.org/sketch/30756
+
+
 System Requirements
 -------------------
 
